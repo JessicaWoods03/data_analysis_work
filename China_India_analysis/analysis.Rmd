@@ -1,0 +1,374 @@
+---
+title: "final_project"
+output: word_document
+date: "2023-05-24"
+author: "Jessica Woods"
+---
+
+```{r setup, include=TRUE}
+library(tidyverse)
+library(ggplot2)
+library(HistData)
+library(dplyr)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r, results= TRUE}
+#import data to clean, which is from India csv file collected from Kaggle
+# This data includes monthly reports about the air quality
+india_air_data<-read.csv("city_day.csv")
+# this data is five years of data 2015-2020
+# Don't care about AQI, it is a generalization that may or may not be accurate, we don't want anything in the data that tells you what to think-
+
+clean_data_india_2.5<-na.omit(india_air_data$PM2.5)
+clean_data_india_10.0<-na.omit(india_air_data$PM10)
+
+# Specify the columns to remove NA values from
+columns <- c("PM2.5", "PM10")
+# Create a logical vector indicating complete cases in specified columns
+complete_rows <- complete.cases(india_air_data[, columns])
+clean_data <- subset(india_air_data, complete_rows)
+#check to see what the outliers are for further analysis
+# Arrange data in ascending order by date
+date_ordered <- clean_data[order(clean_data$Date), ]
+
+date_ordered$Date <- as.Date(date_ordered$Date)
+y <- date_ordered$PM2.5
+x <- date_ordered$Date
+y_11 <- date_ordered$PM10
+
+# so I want to visually look for possible outliers in the data for further cleaning 
+india_pm2.5_graph<-plot(x, y, type = "l", xlab = "Date", ylab = "PM2.5", main = "PM2.5 over Time In India")
+india_pm10_graph<-plot(x, y_11, type = "l", xlab = "Date", ylab = "PM10", main = "PM10 over Time In India")
+
+
+```
+
+## Including Plots
+
+Lets do China next:
+
+```{r, results= TRUE}
+# combine and look at china as a whole like I did India before we break them 
+China_data <- data.frame()
+csv_files<-c("PRSA_Data_Dongsi_20130301-20170228.csv","PRSA_Data_Aotizhongxin_20130301-20170228.csv", "PRSA_Data_Changping_20130301-20170228.csv", "PRSA_Data_Dingling_20130301-20170228.csv", "PRSA_Data_Guanyuan_20130301-20170228.csv", "PRSA_Data_Gucheng_20130301-20170228.csv", "PRSA_Data_Huairou_20130301-20170228.csv", "PRSA_Data_Nongzhanguan_20130301-20170228.csv", "PRSA_Data_Shunyi_20130301-20170228.csv", "PRSA_Data_Tiantan_20130301-20170228.csv","PRSA_Data_Wanliu_20130301-20170228.csv", "PRSA_Data_Wanshouxigong_20130301-20170228.csv")
+
+```
+
+This cleaning will take a bit more work as the data from Kaggle is a mess and we want the China data in a similar format as the India data to create a scale, the data should intersect at 2015, where China starts early at 2013-2017 and India goes from 2015 -2020. The two year intersection is important analyse. Both of these countries are always tormented by environmentalist, so I want to see for myself what it looks like. This analysis is not to prove a point or a argument, its to learn about the factors involved that can be disputed as nonsense.
+```{r, results= TRUE}
+# Iterate over each CSV file
+for (file in csv_files) {
+  data <- read.csv(file)
+  China_data <- rbind(China_data, data)
+}
+# fix the date
+China_data$Date <- paste(China_data$month, China_data$day, China_data$year, sep = "/")
+
+```
+Lets clean up the dates we have too much data...Do not try to rerun the top chunk after you run this one because it won't work as you need those ...hmmm- lets change variables for safe reasons
+```{r, results= TRUE}
+#remove some columns from this
+China_data_clean = China_data[ -c(1:5) ]
+clean_data_China_2.5<-na.omit(China_data_clean$PM2.5)
+clean_data_China_10.0<-na.omit(China_data_clean$PM10)
+
+```
+Now lets take a look at China's air pollution over time like we did India as a whole.
+
+```{r, results= TRUE}
+date_ordered_china <- China_data_clean[order(China_data_clean$Date), ]
+
+date_ordered_china$Date <- as.Date(date_ordered_china$Date)
+y_2 <- date_ordered_china$PM2.5
+x1 <- date_ordered_china$Date
+y_10 <- date_ordered_china$PM10
+
+# so I want to visually look for possible outliers in the data for further cleaning 
+graph_china_pm2.5<-plot(x1, y_2, type = "l", xlab = "Date", ylab = "PM2.5", main = "PM2.5 over Time In China")
+graph_china_pm10<-plot(x1, y_10, type = "l", xlab = "Date", ylab = "PM10", main = "PM10 over Time In China")
+
+```
+transparent colors I found online which is cool and needed-
+```{r, results= TRUE}
+## Transparent colors
+## Mark Gardener 2015
+## www.dataanalytics.org.uk
+
+t_col <- function(color, percent = 50, name = NULL) {
+  #      color = color name
+  #    percent = % transparency
+  #       name = an optional name for the color
+
+## Get RGB values for named color
+rgb.val <- col2rgb(color)
+
+## Make new color using input color as base and alpha set by transparency
+t.col <- rgb(rgb.val[1], rgb.val[2], rgb.val[3],
+             max = 255,
+             alpha = (100 - percent) * 255 / 100,
+             names = name)
+
+## Save the color
+invisible(t.col)
+}
+## END
+
+```
+Compare graphs to see the differences this is PM10 were the graphs are paired together over a 5 year span of the collected data, even though they are different dates, because I classified the date, it can easily pair them together with par() function. Interesting part of this is, is that the economic structures that affect the air are different in each country. India is a communal country more so than industrial, as China is largely industrial. 
+Red = India
+Green = China
+
+```{r, results= TRUE}
+mycol <- t_col("green", perc = 40, name = "lt.green")
+plot(x,y_11,type="l",col=mycol)
+par(new=TRUE)
+
+#China data compared to India's data over 5 year span.
+plot(x1,y_10,type="l",col="red")
+
+```
+Next we will look at PM2.5 particles that are more from seated into pollution.
+```{r, results= TRUE}
+y_range = c(0:1000)
+
+plot(x,y,type="l", col="red")
+par(new=TRUE)
+# china data
+mycol <- t_col("green", perc = 30, name = "lt.green")
+plot(x1, y_2,type= "l", col=mycol)
+
+# I have to clean China's data even more to compare as China goes to 1000 in PM2.5
+# it needs to be on some equal grounds to fully compare the graphs as you can see the first graph is way off  and the second one is more equally compared.
+
+date_ordered_china <- date_ordered_china[which(date_ordered_china$PM2.5 <= 800),]
+
+# this should give a better comparison
+date_ordered_china$Date <- as.Date(date_ordered_china$Date)
+y_2_changed <- date_ordered_china$PM2.5
+x1_changed <- date_ordered_china$Date
+
+# I had to do the same thing with India...I selected all data in the PM2.5 values below or equal to 800
+date_ordered_1 <- clean_data[order(clean_data$Date), ]
+
+date_ordered_1$Date <- as.Date(date_ordered_1$Date)
+
+date_ordered_1 <- date_ordered_1[which(date_ordered_1$PM2.5 <= 800),]
+y_changed <- date_ordered_1$PM2.5
+x_changed <- date_ordered_1$Date
+
+# these are not the pretty graphs, I was simply mashing them together to see if there was a significant difference
+# between China and India before I started analyzing the data.
+plot(x1_changed, y_2_changed,type= "l", col=mycol)
+par(new=TRUE)
+plot(x_changed, y_changed, type="l", col="red")
+
+```
+With these visuals we can easily say industrialism has a greater impact on the air quality than communial of high populations. In the PM2.5 of India, you can surmise that the monsoon season between April and September is more impacted than the monsoon seasons are in China. We can look at the means of China per year and compare it to the means of India per year. Which would conclude that theory.
+
+```{r, results= TRUE}
+dates_as_date<-as.Date(China_data_clean$Date, format = "%m/%d/%Y")
+#my dates were still messed up so I had to change them more in China data-
+dates_as_date_i<-as.Date(india_air_data$Date, format = "%m/%d/%y")
+
+China_data_clean$Date_as_Date <- dates_as_date
+india_air_data$Date_as_Date<- dates_as_date_i
+# Extract the dates and PM2.5 values
+# Filter for the years 2015, 2016, and 2017
+filtered_data_china_2015_17 <- subset(China_data_clean, format(Date_as_Date, "%Y") %in% c("2015", "2016", "2017"))
+filtered_data_india_2015_17 <- subset(india_air_data, format(Date_as_Date, "%Y") %in% c("2015", "2016", "2017"))
+# remove na's from India's data agian...
+filtered_data_india_2015_17<-filtered_data_india_2015_17[complete.cases(filtered_data_india_2015_17$PM2.5, filtered_data_india_2015_17$PM10), ]
+filtered_data_china_2015_17<-filtered_data_china_2015_17[complete.cases(filtered_data_china_2015_17$PM2.5, filtered_data_china_2015_17$PM10), ]
+df_india <- data.frame(filtered_data_india_2015_17)
+df_china <- data.frame(filtered_data_china_2015_17)
+
+# Plotting PM2.5 for India and China together
+y_changed <- df_india$PM2.5
+x_changed <- df_india$Date_as_Date
+y_china <- df_china$PM2.5
+
+x_china<- df_china$Date_as_Date
+
+plot(x_china, y_china, col= mycol, ylab="Particles per Air Sample in China", xlab="Year")
+
+plot(x_changed, y_changed, col="red", ylab="Particles per Air Sample in India", xlab = "Year")
+
+mean(df_china$PM2.5) #mean value is 76.95093
+mean(df_india$PM2.5) #mean value is 74.9217
+hist(y_china, main = "Histogram of PM2.5 in China", xlab = "PM2.5", ylab = "Frequency")
+hist(y_changed, main = "Histogram of PM2.5 in India", xlab = "PM2.5", ylab = "Frequency")
+
+```
+I am going to study the data and determine if the select data is parametric or not. What is my null hypothesis and alpha level. "H0: There is a significant difference in PM2.5 levels from monsoon season in China and India."
+
+```{r, results= TRUE}
+
+filtered_data_china_May_Sept <- subset(China_data_clean, format(Date_as_Date, "%m") %in% c("05", "06", "07","08","09"))
+filtered_data_india_April_Sept <- subset(india_air_data, format(Date_as_Date, "%m") %in% c("04", "05", "06", "07","08","09"))
+# I want all the months outside of monsoon weather to compare the data, China has one less month of Monsoon weather
+filtered_data_china_no_monsoon <- subset(China_data_clean, format(Date_as_Date, "%m") %in% c("01", "02","03","04","10","11","12"))
+filtered_data_india_no_monsoon <- subset(india_air_data, format(Date_as_Date, "%m") %in% c("01", "02","03","10","11","12"))
+#monsoon variables
+monsoon_y_china = filtered_data_china_May_Sept$PM2.5
+monsoon_x_china = filtered_data_china_May_Sept$Date_as_Date
+# no monsoon variables
+monsoon_y_china <- na.omit(monsoon_y_china)
+no_monsoon_y_china = filtered_data_china_no_monsoon$PM2.5
+# need to rerun because I think somehow it has NA values
+# somehow LOL- na's invaded my data-
+no_monsoon_x_china = filtered_data_china_no_monsoon$Date_as_Date
+no_monsoon_y_china <- na.omit(no_monsoon_y_china)
+# I am putting the histograms next to each other
+par(mfrow = c(1, 2))
+hist(no_monsoon_y_china, main = "Histogram of PM2.5 in No Monsoon China", xlab = "PM2.5", ylab = "Frequency" )
+hist(monsoon_y_china,main = "Histogram of PM2.5 in Monsoon China", xlab = "PM2.5", ylab = "Frequency")
+#india monsoon variables and no monsoon variables
+monsoon_y_india = filtered_data_india_April_Sept$PM2.5
+monsoon_y_india <- na.omit(monsoon_y_india)
+
+monsoon_x_india = filtered_data_india_April_Sept$Date_as_Date
+no_monsoon_y_india = filtered_data_india_no_monsoon$PM2.5
+no_monsoon_y_india <- na.omit(no_monsoon_y_india)
+
+no_monsoon_x_india = filtered_data_india_no_monsoon$Date_as_Date
+hist(monsoon_y_india, main= "Historgram of PM2.5 in Monsoon of India", xlab = "PM2.5", ylab = "Frequency")
+hist(no_monsoon_y_india, main= "Historgram of PM2.5 with No Monsoon in India", xlab = "PM2.5", ylab = "Frequency")
+mean(no_monsoon_y_china) #mean =91.31508
+mean(monsoon_y_china) # mean = 63.73192
+mean(no_monsoon_y_india) # mean = 91.00855
+mean(monsoon_y_india) # mean = 43.70478
+
+sd(no_monsoon_y_china) #standard dev = 94.46
+sd(monsoon_y_china) # standard dev = 52.50
+sd(no_monsoon_y_india) #standard dev = 72.79
+sd(monsoon_y_india) #standard dev = 43.95
+```
+Because we can see in the histogram that this might not be normally distributed I will try the Wilcoxon Rank Test.
+
+```{r, results= TRUE}
+# Perform Wilcoxon rank-sum test
+wilcox_test <- wilcox.test(no_monsoon_y_china, monsoon_y_china)
+
+# Print the results
+print(wilcox_test)
+
+# The P-Value 2.2e-16 supports the hypothesis that a monsoon strongly changes the results of PM2.5 values in China.
+
+```
+Now to do a Wilcoxon Test on the India Monsoon data.
+```{r, results= TRUE}
+# Perform Wilcoxon rank-sum test
+wilcox_test_india <- wilcox.test(no_monsoon_y_india, monsoon_y_india)
+
+# Print the results
+print(wilcox_test_india)
+# The P-Value 2.2e-16 supports the hypothesis that a monsoon strongly changes the results of PM2.5 values in India.
+```
+Next I will perform a sign test, since we know this non parametric data.
+```{r, results= TRUE}
+# Perform sign test
+result_of_sign_china <- binom.test(sum(no_monsoon_y_china > monsoon_y_china), n = length(no_monsoon_y_china))
+result_of_sign_india<- binom.test(sum(no_monsoon_y_india > monsoon_y_india), n = length(no_monsoon_y_india))
+# Print the results
+print(result_of_sign_china)
+print(result_of_sign_india)
+
+```
+To confirm this we will perform a chiX2 test on the data.
+```{r, results= TRUE}
+#so it blew up because I need to take a sample to make them the same length of data
+sample_no_monsoon_china <- sample(no_monsoon_y_china, 10000)
+sample_monsoon_china <-sample(monsoon_y_china, 10000)
+sample_no_monsoon_india<-sample(no_monsoon_y_india, 10000)
+sample_monsoon_india<- sample(monsoon_y_india, 10000)
+# Create a contingency table of the observed frequencies
+table_china <- table(sample_no_monsoon_china, sample_monsoon_china)
+table_india <- table(sample_no_monsoon_india, sample_monsoon_india)
+# Perform the chi-squared test
+chi_sq_test_china <- chisq.test(table_china)
+chi_sq_test_india <- chisq.test(table_india)
+# Print the results
+print(chi_sq_test_china)
+print(chi_sq_test_india)
+
+```
+Lets also check if we remove a monsoon month from the data, in India and compare it to China, to see if industrial vr communal has any impact on the air quality in comparison to monsoons.
+```{r}
+filtered_data_india_monsoon_no_april <-subset(india_air_data, format(Date_as_Date, "%m") %in% c("05", "06", "07","08","09"))
+# Create a copy of the "10" month data to simulate a similar monsoon season as China
+september_data <- subset(india_air_data, format(Date_as_Date, "%m") == "10")
+filtered_data_india_no_monsoon_with_April <- filtered_data_india_no_monsoon
+# Add the copy to the existing data frame
+filtered_data_india_no_monsoon_with_April <- rbind(filtered_data_india_no_monsoon_with_April, september_data)
+simulation_of_china_monsoon_in_india <- filtered_data_india_monsoon_no_april$PM2.5
+#drop NA's they are the worst bugs in this mess
+simulation_of_china_monsoon_in_india<- na.omit(simulation_of_china_monsoon_in_india)
+simulation_of_china_nomonsoon_in_india <-filtered_data_india_no_monsoon_with_April$PM2.5
+simulation_of_china_nomonsoon_in_india <- na.omit(simulation_of_china_nomonsoon_in_india)
+
+# lets compare the mean and standard deviation of a simulated India with China's monsoon months
+mean(simulation_of_china_nomonsoon_in_india) # mean is 88.82
+mean(simulation_of_china_monsoon_in_india) # mean is 41.65
+mean(no_monsoon_y_china) #mean =91.31508
+mean(monsoon_y_china) # mean = 63.73192
+
+sd(simulation_of_china_nomonsoon_in_india) #standard deviation 71.13
+sd(simulation_of_china_monsoon_in_india) #standard deviation 44.97
+sd(no_monsoon_y_china) #standard dev = 94.46
+sd(monsoon_y_china) # standard dev = 52.50
+```
+We can plot a density curve also comparing these results.
+```{r show="True"}
+# Plotting density curves
+plot(density(simulation_of_china_nomonsoon_in_india), 
+     col = "blue", 
+     lwd = 2, 
+     main = "Density Comparison of Simulation of India and Actual Weather of India",
+     xlab = "PM2.5 Values",
+     ylab = "Density")
+
+lines(density(simulation_of_china_monsoon_in_india), 
+      col = "red", 
+      lwd = 2)
+
+lines(density(no_monsoon_y_india),
+      col = "green",
+      lwd = 2)
+
+lines(density(monsoon_y_india),
+      col = "orange",
+      lwd = 2)
+
+# Adding a legend
+legend("topright", 
+       legend = c("Simulation - No Monsoon", "Simulation - Monsoon", "Actual - No Monsoon", "Actual - Monsoon"),
+       col = c("blue", "red", "green", "orange"),
+       lwd = 2)
+
+```
+Interesting the mean values are the same roughly over the same period of time, so I am going to do further analysis to just make requirements for the class, because I am running out of time.
+I am going to create a density plot and compare data with.
+
+```{r}
+#install.packages("forecast")
+#library(forecast)
+# Extract the 'PM2.5' column as a numeric vector
+#my_data <- as.numeric(df_india$PM2.5)
+#start_date <- as.Date("2015-01-01")
+# Create a time series object
+#my_ts <- ts(my_data, start = start_date, frequency = 12)  # Adjust start date and frequency as needed
+
+# Plot the time series
+#plot(my_ts, main = "My Time Series Data", xlab = "Date", ylab = "Value")
+
+# Fit an ARIMA model
+#arima_model <- auto.arima(my_ts)
+#forecast_values <- forecast(arima_model, h = 12)  # Generate 12-step-ahead forecasts
+#plot(forecast_values, main = "Forecasted Values")
+```
