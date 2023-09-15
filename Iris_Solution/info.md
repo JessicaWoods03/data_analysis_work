@@ -58,7 +58,8 @@ qda_res
 
 <br><b>This does not tell what the model is doing, nor does it tell you if it can do
 the job even though the results are reasonable. So I began validating and cross-validating this model.</b><br>There were five of these models written out in the same fashion, none those examples show you why
-those would work to solve it. It’s just numbers. My work was deleted by a teammate without explainations.
+those would work to solve it. It’s just numbers. My work was deleted by a teammate without explainations, I have no ideal 
+who did that?
 <b><h3> Personal note on teamwork:</b><br></h3>
 I don’t think its right to work against someone or argue their logic. It’s not team work and it
 gets you nowhere. I forked over a copy of the Iris Code we were working on and continued my work
