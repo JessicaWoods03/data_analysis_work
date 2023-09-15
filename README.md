@@ -1,1 +1,1 @@
-# data_analysis_work
+This is the analysis work I have been doing for the past year or so in college working on my masters degree in Data Science. These analysis are allowed for sharing and publication. There is also work done outside college that I did on my own.
