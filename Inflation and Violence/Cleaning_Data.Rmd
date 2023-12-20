@@ -1,0 +1,49 @@
+---
+title: "Food Inflation Study"
+author: "Jessica Woods"
+date: "2023-12-20"
+output: pdf_document
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(glmnet)
+library(MASS)
+
+# library(emergency_back_up_brain)
+# library(coffee)
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+In this R document I will be specifically just cleaning data and correlating data points that are relavant to modeling and saving those back to a new CSV file to be visually assessed in Python and modeled in R. 
+
+Below is the loaded CSV files needed to start cleaning for modeling and analysis work. The link to get the food inflation information is <https://microdata.worldbank.org/index.php/catalog/4483> from December 2019 to December 2023 to complete 4 years of data on internation food inflation. 
+"Monthly food price estimates by product and market 25 countries, 1353 markets, 2007/01/01-2023/12/01, version 2023/12/11" -The World Bank of Microdata website.
+There are two other factors in the analysis work, that is conflict (gun violence and war) and the US stock Market prices from December 2019 to December 2023.
+
+The current HO: "The occurrence of conflict in key food-producing regions, coupled with fluctuations in the US stock market, significantly influences international food inflation rates. Higher instances of conflict and volatility in the US stock market are expected to correlate with increased food inflation on a global scale."
+The current Alternative HO : "The impact of conflict and US stock market fluctuations on international food inflation rates may not exhibit a significant correlation."
+
+```{r include=TRUE}
+# Food inflation data
+food_data <- read.csv("Food_inflation_2019_2023.csv", header=TRUE, sep=",")
+
+```
+
+Below is the conflict data which is from <https://acleddata.com/data-export-tool/>. This requires a access key to get this data, it seems to be the most up to date data on conflicts. That coincides with the Dates from the Food inflation.
+
+```{r include=TRUE}
+# Conflict data
+
+```
+
+Below is the the US Stock Market Data which is from <https://www.ers.usda.gov/data-products/wheat-data/> and Yahoo Stocks for rought rice <https://finance.yahoo.com/quote/ZR%3DF/history?period1=1575158400&period2=1703030400&interval=1d&filter=history&frequency=1d&includeAdjustedClose=true>. 
+```{r include=TRUE}
+# US Stock Market Data
+
+```
