@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(glmnet)
 library(MASS)
-
+library(dplyr)
 # library(emergency_back_up_brain)
 # library(coffee)
 
@@ -32,6 +32,43 @@ The current Alternative HO : "The impact of conflict and US stock market fluctua
 ```{r include=TRUE}
 # Food inflation data
 food_data <- read.csv("Food_inflation_2019_2023.csv", header=TRUE, sep=",")
+# time to clean this up
+clean_food_data <- subset(food_data, select = -X)
+clean_food_data <-na.omit(clean_food_data)
+clean_food_data <- subset(clean_food_data, select = -Market)
+clean_food_data <-subset(clean_food_data, select = -Currency)
+
+```
+
+Narrowing down the top most conflicted countries in the past 4 years according to Wikipedia <https://en.wikipedia.org/wiki/List_of_ongoing_armed_conflicts> sited.
+Mexico, Ukraine, Afghanistan, Syria (Syrian Arab Republic), Ethiopia, Yemen
+
+```{r include=TRUE}
+conflicted_countries_food_data <- clean_food_data %>%
+  filter(Country %in% c("Afghanistan", "Syrian Arab Republic", "Mexico", "Yemen", "Ukraine","Ethiopia"))
+str(conflicted_countries_food_data)
+```
+
+Afghanistan data on Food Inflation open and close, the difference between the two. Its important to look at the distribution of the data to do further analysis and cleaning of the data. 
+```{r include=TRUE}
+data_afghanistan <- conflicted_countries_food_data[conflicted_countries_food_data$Country == "Afghanistan", ]
+open_values_afghanistan <- data_afghanistan$Open
+closed_values_afghanistan <- data_afghanistan$Close
+difference_afghanistan <- open_values_afghanistan - closed_values_afghanistan
+print(difference_afghanistan)
+# Create a sequence for x-axis (assuming you want a sequence of numbers as x-axis)
+x <- seq(length(open_values_afghanistan))
+x2 <-seq(length(closed_values_afghanistan))
+# Plotting Open values for Afghanistan
+plot(x, open_values_afghanistan, type = "l", xlab = "Data Points", ylab = "Open Values", main = "Open Values for Afghanistan")
+plot(x2, closed_values_afghanistan, type = "l", xlab = "Data Points", ylab = "Closed Values", main = "Closed Values for Afghanistan")
+
+#seems to be normally distributed, this helps narrow down appropriate models to examine Afghanistan specifically.
+hist(difference_afghanistan)
+
+# lots of zero values in both that might effect the ability to show a normal distribution of the data.Histograms are great to point out what more needs to be cleaned out of the data.
+hist(open_values_afghanistan)
+hist(closed_values_afghanistan)
 
 ```
 
