@@ -20,7 +20,7 @@ library(dplyr)
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-In this R document I will be specifically just cleaning data and correlating data points that are relavant to modeling and saving those back to a new CSV file to be visually assessed in Python and modeled in R. 
+In this R document I will be specifically just cleaning data and correlating data points that are relevant to modeling, looking at the distribution of the data and saving those back to a new CSV file to be visually assessed in Python and modeled in R. 
 
 Below is the loaded CSV files needed to start cleaning for modeling and analysis work. The link to get the food inflation information is <https://microdata.worldbank.org/index.php/catalog/4483> from December 2019 to December 2023 to complete 4 years of data on internation food inflation. 
 "Monthly food price estimates by product and market 25 countries, 1353 markets, 2007/01/01-2023/12/01, version 2023/12/11" -The World Bank of Microdata website.
@@ -47,28 +47,67 @@ Mexico, Ukraine, Afghanistan, Syria (Syrian Arab Republic), Ethiopia, Yemen
 conflicted_countries_food_data <- clean_food_data %>%
   filter(Country %in% c("Afghanistan", "Syrian Arab Republic", "Mexico", "Yemen", "Ukraine","Ethiopia"))
 str(conflicted_countries_food_data)
+conflicted_countries_food_data <- conflicted_countries_food_data %>%
+  filter(Open != 0)
+conflicted_countries_food_data <- conflicted_countries_food_data %>% filter(Close != 0)
+conflicted_countries_food_data <-conflicted_countries_food_data %>% filter(High != 0)
+
+#Isolate Food Price Index
+conflicted_countries_food_price_index<-conflicted_countries_food_data[conflicted_countries_food_data$Product == "food_price_index", ]
+conflicted_countries_food_data <- conflicted_countries_food_data %>%
+  filter(Product != "food_price_index")
+str(conflicted_countries_food_price_index)
+
 ```
 
-Afghanistan data on Food Inflation open and close, the difference between the two. Its important to look at the distribution of the data to do further analysis and cleaning of the data. 
+Afghanistan data on Food Inflation open and close, the difference between the two. Its important to look at the distribution of the data to do further analysis and cleaning of the data. If the differences between open and close prices themselves follow a normal distribution, it could suggest a certain level of regularity and randomness in price movements.
 ```{r include=TRUE}
 data_afghanistan <- conflicted_countries_food_data[conflicted_countries_food_data$Country == "Afghanistan", ]
+
 open_values_afghanistan <- data_afghanistan$Open
 closed_values_afghanistan <- data_afghanistan$Close
 difference_afghanistan <- open_values_afghanistan - closed_values_afghanistan
-print(difference_afghanistan)
+
+
 # Create a sequence for x-axis (assuming you want a sequence of numbers as x-axis)
 x <- seq(length(open_values_afghanistan))
 x2 <-seq(length(closed_values_afghanistan))
+x3 <- seq(length(difference_afghanistan))
 # Plotting Open values for Afghanistan
 plot(x, open_values_afghanistan, type = "l", xlab = "Data Points", ylab = "Open Values", main = "Open Values for Afghanistan")
 plot(x2, closed_values_afghanistan, type = "l", xlab = "Data Points", ylab = "Closed Values", main = "Closed Values for Afghanistan")
+plot(x3, difference_afghanistan, type = "l", xlab = "Data Points", ylab = "Closed Values", main = "Closed Values for Afghanistan")
 
 #seems to be normally distributed, this helps narrow down appropriate models to examine Afghanistan specifically.
 hist(difference_afghanistan)
 
-# lots of zero values in both that might effect the ability to show a normal distribution of the data.Histograms are great to point out what more needs to be cleaned out of the data.
+# open and close are distributed to the right
 hist(open_values_afghanistan)
 hist(closed_values_afghanistan)
+```
+In financial markets, a normal distribution of price index differences might support the idea of market efficiency, suggesting that market prices reflect all available information, and arbitrage opportunities might be limited. Furthermore,  the questioning factor still remains that the open and close histograms are right skewed, which indicate otherwise. Its considered a bullish market indication.
+
+```{r include=TRUE}
+# check to values of the Food Index Prices and see if they reflect a normal distribution or not
+# Food Price Index
+index_afghanistan_data <- conflicted_countries_food_price_index[conflicted_countries_food_price_index$Country=="Afghanistan",]
+index_afghanistan_open <- index_afghanistan_data$Open
+index_afghanistan_close <- index_afghanistan_data$Close
+index_afghanistan_difference <- index_afghanistan_open - index_afghanistan_close
+
+x1_index <- seq(length(index_afghanistan_open))
+x2_index <- seq(length(index_afghanistan_close))
+x3_index <- seq(length(index_afghanistan_difference))
+
+plot(x1_index, index_afghanistan_open, type = "l", xlab = "Data Points", ylab = "Open Values", main = "Open Values for Food Index Prices Afghanistan")
+plot(x2_index, index_afghanistan_close, type = "l", xlab = "Data Points", ylab = "Closed Values", main = "Open Values for Food Index Prices Afghanistan")
+plot(x3_index, index_afghanistan_difference, type = "l", xlab = "Data Points", ylab = "Difference in Values", main = "Difference in Values for Food Index Prices Afghanistan")
+# these are sckewed to the right to the higher values
+hist(index_afghanistan_close)
+hist(index_afghanistan_open)
+
+# this seems to hold a normal distribution which is probably best to work with-
+hist(index_afghanistan_difference)
 
 ```
 
