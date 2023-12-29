@@ -5,6 +5,6 @@ The current Alternative HO : "The impact of conflict and US stock market fluctua
 Below is a list of countries I screenshot from Wikipedia that intel some of the most conflicted countries: <br>
 "<img width="717" alt="Screenshot 2023-12-20 at 5 39 45 PM" src="https://github.com/JessicaWoods03/data_analysis_work/assets/48572600/3eeac57e-b6ec-45e1-b184-778f37fc8623">
 <br>
-The ideal is to understand the impact of conflict and US Stock Markets have on food inflations internationally on other countries. I have narrowed it down to 5 countries. Below is narrowing down significant points of the food market that impacted a majority of the regions across the 3 countries in the dataset that I have that are found out of the highest most listed conflicted countries found in Wikidepia.
+The ideal is to understand the impact of conflict and US Stock Markets have on food inflations internationally on other countries. I have narrowed it down to 5 countries. Below is narrowing down significant points of the food market that impacted a majority of the regions across the three different countries that was available from the 5 top conflicted countries in Wikipedia, that are in the dataset itself.
 
 <img width="801" alt="Screenshot 2023-12-29 at 10 11 30 AM" src="https://github.com/JessicaWoods03/data_analysis_work/assets/48572600/122e959a-69f0-4e6b-b42d-9a1089e3f5a0">
