@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(glmnet)
 library(MASS)
 library(dplyr)
+library(ggplot2)
 # library(emergency_back_up_brain)
 # library(coffee)
 
@@ -41,16 +42,16 @@ clean_food_data <-subset(clean_food_data, select = -Currency)
 ```
 
 Narrowing down the top most conflicted countries in the past 4 years according to Wikipedia <https://en.wikipedia.org/wiki/List_of_ongoing_armed_conflicts> sited.
-Mexico, Ukraine, Afghanistan, Syria (Syrian Arab Republic), Ethiopia, Yemen
+Mexico, Ukraine, Afghanistan, Syria (Syrian Arab Republic), Ethiopia, Yemen Out of those listed I found 3
+in the data set to work with.
 
 ```{r include=TRUE}
 conflicted_countries_food_data <- clean_food_data %>%
-  filter(Country %in% c("Afghanistan", "Syrian Arab Republic", "Mexico", "Yemen", "Ukraine","Ethiopia"))
-str(conflicted_countries_food_data)
+  filter(Country %in% c("Afghanistan", "Syrian Arab Republic", "Yemen, Rep."))
+
 conflicted_countries_food_data <- conflicted_countries_food_data %>%
-  filter(Open != 0)
-conflicted_countries_food_data <- conflicted_countries_food_data %>% filter(Close != 0)
-conflicted_countries_food_data <-conflicted_countries_food_data %>% filter(High != 0)
+  filter(Open != 0 & Close != 0 & High != 0)
+confliced_countries_food_data <- na.omit(conflicted_countries_food_data[c("Open", "Close")])
 
 #Isolate Food Price Index
 conflicted_countries_food_price_index<-conflicted_countries_food_data[conflicted_countries_food_data$Product == "food_price_index", ]
@@ -58,6 +59,47 @@ conflicted_countries_food_data <- conflicted_countries_food_data %>%
   filter(Product != "food_price_index")
 str(conflicted_countries_food_price_index)
 
+#  factor  products, regions, countries
+conflicted_countries_food_data$Product <- as.factor(conflicted_countries_food_data$Product)
+conflicted_countries_food_data$Country <- as.factor(conflicted_countries_food_data$Country)
+# Convert 'Region' to a factor within each country
+conflicted_countries_food_data$Region <- as.factor(conflicted_countries_food_data$Region)
+conflicted_countries_food_data$Region <- factor(
+  conflicted_countries_food_data$Region,
+  levels = unique(conflicted_countries_food_data$Region) 
+)
+
+str(conflicted_countries_food_data)
+# I want to know which regions have the highest fluctuation in their markets
+conflicted_countries_food_data$Fluctuation <- conflicted_countries_food_data$Close - conflicted_countries_food_data$Open
+# Find observations with the highest fluctuations
+top_fluctuations <- conflicted_countries_food_data[order(conflicted_countries_food_data$Fluctuation, decreasing = TRUE), ]
+head(top_fluctuations)
+product_region_count <- conflicted_countries_food_data %>%
+  group_by(Product) %>%
+  summarise(Region_Count = n_distinct(Region)) %>%
+  arrange(desc(Region_Count))
+
+# Product with the most regions
+product_with_most_regions <- product_region_count[which.max(product_region_count$Region_Count), ]
+top_three_products <- product_region_count %>%
+  slice_head(n = 3)
+
+# Create a pie chart for the top three regions
+ggplot(top_three_products, aes(x = "", y = Region_Count, fill = Product)) +
+  geom_bar(stat = "identity", width = 1, color = "white", size = 1) +
+  coord_polar("y", start = 0) +
+  labs(title = "Top Three Products by Region Count", fill = "Product", x = NULL, y = NULL) +
+  theme_void() +
+  theme(legend.position = "right") +
+  scale_fill_discrete(name = "Product")
+top_three_products
+product_with_most_regions
+
+num_unique_regions <- conflicted_countries_food_data %>%
+  summarise(Num_Regions = n_distinct(Region))
+
+num_unique_regions
 ```
 
 Afghanistan data on Food Inflation open and close, the difference between the two. Its important to look at the distribution of the data to do further analysis and cleaning of the data. If the differences between open and close prices themselves follow a normal distribution, it could suggest a certain level of regularity and randomness in price movements.
