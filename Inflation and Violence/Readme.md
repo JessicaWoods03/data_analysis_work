@@ -9,3 +9,7 @@ The ideal is to understand the impact of conflict and US Stock Markets have on f
 <b>((Remember this is all fun and curiousity for me, to delvulge myself into trends with the neat educational stones  I am learning in my Masters in Data Science Major at Denver University))</b>
 
 <img width="801" alt="Screenshot 2023-12-29 at 10 11 30 AM" src="https://github.com/JessicaWoods03/data_analysis_work/assets/48572600/122e959a-69f0-4e6b-b42d-9a1089e3f5a0">
+<br>
+Below is a chart to help you understand product distrubution by Country from the top three most influential food staples in these conflicted countries.
+<img width="731" alt="Screenshot 2023-12-29 at 1 08 46 PM" src="https://github.com/JessicaWoods03/data_analysis_work/assets/48572600/0f7d06bf-2bac-43f3-92e6-6c6eaa45e651">
+
