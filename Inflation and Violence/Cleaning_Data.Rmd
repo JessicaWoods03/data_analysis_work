@@ -38,6 +38,8 @@ clean_food_data <- subset(food_data, select = -X)
 clean_food_data <-na.omit(clean_food_data)
 clean_food_data <- subset(clean_food_data, select = -Market)
 clean_food_data <-subset(clean_food_data, select = -Currency)
+#fix the date
+clean_food_data$Date <-as.Date(clean_food_data$Date, format = "%Y-%m-%d")
 
 ```
 
@@ -181,6 +183,7 @@ Below is the conflict data which is from <https://acleddata.com/data-export-tool
 
 ```{r include=TRUE}
 # Conflict data
+
 
 ```
 
