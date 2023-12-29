@@ -84,6 +84,15 @@ product_region_count <- conflicted_countries_food_data %>%
 product_with_most_regions <- product_region_count[which.max(product_region_count$Region_Count), ]
 top_three_products <- product_region_count %>%
   slice_head(n = 3)
+# Extract the top three products
+top_three_products_list <- top_three_products$Product
+
+# Filter the original data to get regions and countries for the top three products
+regions_countries_top_three <- conflicted_countries_food_data %>%
+  filter(Product %in% top_three_products_list) %>%
+  distinct(Product, Region, Country)
+
+
 
 # Create a pie chart for the top three regions
 ggplot(top_three_products, aes(x = "", y = Region_Count, fill = Product)) +
@@ -94,7 +103,22 @@ ggplot(top_three_products, aes(x = "", y = Region_Count, fill = Product)) +
   theme(legend.position = "right") +
   scale_fill_discrete(name = "Product")
 top_three_products
-product_with_most_regions
+
+
+unique_countries <- unique(regions_countries_top_three$Country)
+
+product_counts <- regions_countries_top_three %>%
+  group_by(Country, Product, Region) %>%
+  summarise(Count = n(), .groups = "drop")
+
+# Create a pie chart for each country showing product distribution within regions
+ggplot(product_counts, aes(x = "", y = Count, fill = Product)) +
+  geom_bar(stat = "identity", width = 1, color = "white", size = 1) +
+  coord_polar("y", start = 0) +
+  labs(title = "Product Distribution by Country", fill = "Product", x = NULL, y = NULL) +
+  theme_void() +
+  theme(legend.position = "right") +
+  facet_wrap(~ Country)
 
 num_unique_regions <- conflicted_countries_food_data %>%
   summarise(Num_Regions = n_distinct(Region))
