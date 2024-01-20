@@ -54,30 +54,34 @@ conflicted_countries_food_data <- clean_food_data %>%
 conflicted_countries_food_data <- conflicted_countries_food_data %>%
   filter(Open != 0 & Close != 0 & High != 0)
 confliced_countries_food_data <- na.omit(conflicted_countries_food_data[c("Open", "Close")])
+```
 
+
+```{r}
 #Isolate Food Price Index
 conflicted_countries_food_price_index<-conflicted_countries_food_data[conflicted_countries_food_data$Product == "food_price_index", ]
 conflicted_countries_food_data <- conflicted_countries_food_data %>%
   filter(Product != "food_price_index")
 str(conflicted_countries_food_price_index)
 
+# factor and find top products from data, naming convientions are so important as I work through this
+top_products <- conflicted_countries_food_data
 #  factor  products, regions, countries
-conflicted_countries_food_data$Product <- as.factor(conflicted_countries_food_data$Product)
-conflicted_countries_food_data$Country <- as.factor(conflicted_countries_food_data$Country)
+top_products$Product <- as.factor(top_products$Product)
+top_products$Country <- as.factor(top_products$Country)
 # Convert 'Region' to a factor within each country
-conflicted_countries_food_data$Region <- as.factor(conflicted_countries_food_data$Region)
-conflicted_countries_food_data$Region <- factor(
-  conflicted_countries_food_data$Region,
-  levels = unique(conflicted_countries_food_data$Region) 
+top_products$Region <- as.factor(top_products$Region)
+top_products$Region <- factor(
+  top_products$Region,
+  levels = unique(top_products$Region) 
 )
 
-str(conflicted_countries_food_data)
 # I want to know which regions have the highest fluctuation in their markets
-conflicted_countries_food_data$Fluctuation <- conflicted_countries_food_data$Close - conflicted_countries_food_data$Open
+top_products$Fluctuation <- top_products$Close - top_products$Open
 # Find observations with the highest fluctuations
-top_fluctuations <- conflicted_countries_food_data[order(conflicted_countries_food_data$Fluctuation, decreasing = TRUE), ]
+top_fluctuations <- top_products[order(top_products$Fluctuation, decreasing = TRUE), ]
 head(top_fluctuations)
-product_region_count <- conflicted_countries_food_data %>%
+product_region_count <- top_products %>%
   group_by(Product) %>%
   summarise(Region_Count = n_distinct(Region)) %>%
   arrange(desc(Region_Count))
@@ -90,10 +94,9 @@ top_three_products <- product_region_count %>%
 top_three_products_list <- top_three_products$Product
 
 # Filter the original data to get regions and countries for the top three products
-regions_countries_top_three <- conflicted_countries_food_data %>%
+regions_countries_top_three <- top_products %>%
   filter(Product %in% top_three_products_list) %>%
   distinct(Product, Region, Country)
-
 
 
 # Create a pie chart for the top three regions
@@ -122,15 +125,35 @@ ggplot(product_counts, aes(x = "", y = Count, fill = Product)) +
   theme(legend.position = "right") +
   facet_wrap(~ Country)
 
-num_unique_regions <- conflicted_countries_food_data %>%
+num_unique_regions <- top_products %>%
   summarise(Num_Regions = n_distinct(Region))
 
 num_unique_regions
-```
 
+```
+This second set of data is for the main products I am evaluating in each country. Which is Rice, Wheat and Bread.
+```{r}
+# drop all product data that is not wheat, rice or bread and factor data
+conflicted_countries_food_data_main_food <- conflicted_countries_food_data %>%
+  filter(Product %in% c("rice", "wheat", "bread"))
+#str(conflicted_countries_food_data_main_food)
+conflicted_countries_food_data_main_food$Product <- as.factor(conflicted_countries_food_data_main_food$Product)
+conflicted_countries_food_data_main_food$Country <- as.factor(conflicted_countries_food_data_main_food$Country)
+# Convert 'Region' to a factor within each country
+conflicted_countries_food_data_main_food$Region <- as.factor(conflicted_countries_food_data_main_food$Region)
+conflicted_countries_food_data_main_food$Region <- factor(
+  conflicted_countries_food_data_main_food$Region,
+  levels = unique(conflicted_countries_food_data_main_food$Region) 
+)
+str(conflicted_countries_food_data_main_food)
+
+
+
+```
 Afghanistan data on Food Inflation open and close, the difference between the two. Its important to look at the distribution of the data to do further analysis and cleaning of the data. If the differences between open and close prices themselves follow a normal distribution, it could suggest a certain level of regularity and randomness in price movements.
 ```{r include=TRUE}
-data_afghanistan <- conflicted_countries_food_data[conflicted_countries_food_data$Country == "Afghanistan", ]
+#switched values to evaluate the main foods we figured out above.
+data_afghanistan <- conflicted_countries_food_data_main_food[conflicted_countries_food_data_main_food$Country == "Afghanistan", ]
 
 open_values_afghanistan <- data_afghanistan$Open
 closed_values_afghanistan <- data_afghanistan$Close
@@ -152,6 +175,13 @@ hist(difference_afghanistan)
 # open and close are distributed to the right
 hist(open_values_afghanistan)
 hist(closed_values_afghanistan)
+
+combined_data <- data.frame(value = c(open_values_afghanistan, closed_values_afghanistan), group = rep(c("open_values_Afghanistan", "closed_values_Afghanistan"), each = length(closed_values_afghanistan)))
+
+ggplot(combined_data, aes(x = value, fill = group)) +
+  geom_histogram(position = "identity", alpha = 0.7, bins = 20, color = "black") +
+  labs(title = "Combined Histogram", x = "Values", y = "Frequency") +
+  scale_fill_manual(values = alpha(c("red", "yellow"), .2))
 ```
 In financial markets, a normal distribution of price index differences might support the idea of market efficiency, suggesting that market prices reflect all available information, and arbitrage opportunities might be limited. Furthermore,  the questioning factor still remains that the open and close histograms are right skewed, which indicate otherwise. Its considered a bullish market indication.
 
@@ -178,7 +208,33 @@ hist(index_afghanistan_open)
 hist(index_afghanistan_difference)
 
 ```
+Similarly after looking at AFghanistan we want to do the the same thing for the other two countries. This is just to look at how the data is distributed in the market per country out of the three different countries that we are evaluating.Below we will evaluate the Syrian Arab Republic data, leaving Yemen last. I am trying to break this down so you can follow along regardless of your background. The coolest thing I have learned in College about being intelligent or beign able to interpret data...is that its pointless if you can explain it well enough for anyone else to understand.
+```{r}
+data_Syria <- conflicted_countries_food_data_main_food[conflicted_countries_food_data_main_food$Country == "Syrian Arab Republic", ]
+str(data_Syria)
+open_values_Syria <- data_Syria$Open
+closed_values_Syria <- data_Syria$Close
+difference_Syria <- open_values_Syria - closed_values_Syria
 
+
+x <- seq(length(open_values_Syria))
+x2 <-seq(length(closed_values_Syria))
+x3 <- seq(length(difference_Syria))
+# Plotting Open values for Syria
+plot(x, open_values_Syria, type = "l", xlab = "Data Points", ylab = "Open Values", main = "Open Values for Syria")
+plot(x2, closed_values_Syria, type = "l", xlab = "Data Points", ylab = "Closed Values", main = "Closed Values for Syria")
+plot(x3, difference_Syria, type = "l", xlab = "Data Points", ylab = "Closed Values", main = "Closed Values for Syria")
+
+#seems to be normally distributed, this helps narrow down appropriate models to examine Syria specifically.
+hist(difference_Syria)
+
+combined_data <- data.frame(value = c(open_values_Syria, closed_values_Syria), group = rep(c("open_values_Syria", "closed_values_Syria"), each = length(open_values_Syria)))
+
+ggplot(combined_data, aes(x = value, fill = group)) +
+  geom_histogram(position = "identity", alpha = 0.7, bins = 20, color = "black") +
+  labs(title = "Combined Histogram", x = "Values", y = "Frequency") +
+  scale_fill_manual(values = alpha(c("blue", "yellow"), .2))
+```
 Below is the conflict data which is from <https://acleddata.com/data-export-tool/>. This requires a access key to get this data, it seems to be the most up to date data on conflicts. That coincides with the Dates from the Food inflation.
 
 ```{r include=TRUE}
@@ -188,6 +244,7 @@ Below is the conflict data which is from <https://acleddata.com/data-export-tool
 ```
 
 Below is the the US Stock Market Data which is from <https://www.ers.usda.gov/data-products/wheat-data/> and Yahoo Stocks for rought rice <https://finance.yahoo.com/quote/ZR%3DF/history?period1=1575158400&period2=1703030400&interval=1d&filter=history&frequency=1d&includeAdjustedClose=true>. 
+With US Stocks.. need the names of each actual stock that dominates these regions to represent the coefficients of wheat which is my target data. It would essentially look like this: wheat = target, samples = [wheat company 1, wheat company 2, wheat company 3, wheat company 4] with all of the open and close data listed in the US stock markets. Then I will find which coefficients or features are significant in the target data of wheat in that country. You take wheat data from that country in the above Food_inflation_2019_2023.csv that is loaded and that is the target, then building out a data set of different companies of wheat in the US stock market to create the other half of the data. I learned how to do this between Advanced Statistics and Machine Learning. Its kind of important when looking at Linear Regression Models.
 ```{r include=TRUE}
 # US Stock Market Data
 
