@@ -17,6 +17,7 @@ In this visual aid you can see that these three major food distrubutions effect 
 Still you find democratized data holds out on actual companies that can help narrow down the actual market of open close, after doing more digging, I finally found the names of the MEA companies for these areas. 
 
 <img width="200" alt="Screenshot 2024-01-19 at 8 01 39 PM" src="https://github.com/JessicaWoods03/data_analysis_work/assets/48572600/291e4a11-5122-4b84-8fdc-aab4f13b49e4"><br>
+You can find more information on those market trends from this site-> https://www.theinsightpartners.com/reports/middle-east-and-africa-wheat-flour-market#:~:text=The%20wheat%20flour%20market%20in,the%20MEA%20wheat%20flour%20market.
 Actual names are key to pulling US Stock market trends to compare them to the trends in these conflicted countries. <br>
 The funniest part about this research is finding that the most volatile stock is 2 year old male sheep in Syria! Yeah sheep are scarce in violent conflicted countries! The open and close values are rediculious. Obviously, lots of guns and lots of violence, sheep get killed in the conflict.<br>
 
