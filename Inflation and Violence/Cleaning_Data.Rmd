@@ -4,8 +4,10 @@ author: "Jessica Woods"
 date: "2023-12-20"
 output: pdf_document
 ---
+Food inflation rate:
+\[ \text{Inflation Rate} = \left( \frac{\text{Current Food Price Index} - \text{Base Food Price Index}}{\text{Base Food Price Index}} \right) \times 100 \]
 
-```{r setup, include=TRUE}
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
 library(glmnet)
@@ -29,6 +31,7 @@ There are two other factors in the analysis work, that is conflict (gun violence
 
 The current HO: "The occurrence of conflict in key food-producing regions, coupled with fluctuations in the US stock market, significantly influences international food inflation rates. Higher instances of conflict and volatility in the US stock market are expected to correlate with increased food inflation on a global scale."
 The current Alternative HO : "The impact of conflict and US stock market fluctuations on international food inflation rates may not exhibit a significant correlation."
+
 
 ```{r include=TRUE}
 # Food inflation data
@@ -185,7 +188,7 @@ ggplot(combined_data, aes(x = value, fill = group)) +
 ```
 In financial markets, a normal distribution of price index differences might support the idea of market efficiency, suggesting that market prices reflect all available information, and arbitrage opportunities might be limited. Furthermore,  the questioning factor still remains that the open and close histograms are right skewed, which indicate otherwise. Its considered a bullish market indication.
 
-```{r include=TRUE}
+```{r include=FALSE}
 # check to values of the Food Index Prices and see if they reflect a normal distribution or not
 # Food Price Index
 index_afghanistan_data <- conflicted_countries_food_price_index[conflicted_countries_food_price_index$Country=="Afghanistan",]
@@ -207,9 +210,56 @@ hist(index_afghanistan_open)
 # this seems to hold a normal distribution which is probably best to work with-
 hist(index_afghanistan_difference)
 
+# so this is great content but I think this food price index is calculated on all the food items listed for Afghanistan which is good overall but will mask the three products we are looking at. I need to recalculate this. I want to look at each region and how that is effected.
+
+
+```
+The base period is picked on the Wikipedia trends that is on the github readme to show this is the highest  conflicted time of the country that kept consistency for 3 years after. We want to look at the effects of conflict on food inflations. We want to create indices to further analyze the individual products with the company's coefficients in the stock market.
+
+```{r include=TRUE}
+data_afghanistan <- data_afghanistan %>%
+  mutate(MonthYear = format(Date, "%Y-%m"))
+grouped_data_afghanistan <- data_afghanistan %>%
+  group_by(MonthYear, Product, Region, Open, Close) %>%
+  summarize(
+    CurrentPrice = mean((Open + Close) / 2), 
+  )
+#print(grouped_data_afghanistan)
+
+# Calculate the base price for each region
+base_prices <- grouped_data_afghanistan %>%
+  group_by(Region) %>%
+  summarize(
+    BasePrice = mean(CurrentPrice)  
+  )
+# Merge the base prices back into the grouped_data_afghanistan
+final_data_afghanistan <- merge(grouped_data_afghanistan, base_prices, by = "Region")
+#print(final_data_afghanistan)
+
+# recalculate the price index 
+
+new_index_afghanistan <- final_data_afghanistan %>%
+  group_by(MonthYear, Product) %>%
+  summarize(
+    PriceIndex = mean((CurrentPrice / BasePrice) * 100)  # Price Index formula
+  )
+print(new_index_afghanistan)
+ggplot(new_index_afghanistan, aes(x = MonthYear, y = PriceIndex, group = Product, color = Product)) +
+  geom_line() +
+  labs(title = "Price Indices Over Time",
+       x = "Month",
+       y = "Price Index") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+# these three data points are important to the final set of data for Afghanistan
+# Base price, current price, and price index
+# merge them into one data set
+# all the cleaning for Afghanistan is done-
+final_data_afghanistan <- merge(final_data_afghanistan, new_index_afghanistan, by = c("MonthYear", "Product"))
+str(final_data_afghanistan)
 ```
 Similarly after looking at AFghanistan we want to do the the same thing for the other two countries. This is just to look at how the data is distributed in the market per country out of the three different countries that we are evaluating.Below we will evaluate the Syrian Arab Republic data, leaving Yemen last. I am trying to break this down so you can follow along regardless of your background. The coolest thing I have learned in College about being intelligent or beign able to interpret data...is that its pointless if you can explain it well enough for anyone else to understand.
-```{r}
+```{r include=TRUE}
 data_Syria <- conflicted_countries_food_data_main_food[conflicted_countries_food_data_main_food$Country == "Syrian Arab Republic", ]
 str(data_Syria)
 open_values_Syria <- data_Syria$Open
