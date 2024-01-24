@@ -210,11 +210,10 @@ hist(index_afghanistan_open)
 # this seems to hold a normal distribution which is probably best to work with-
 hist(index_afghanistan_difference)
 
-# so this is great content but I think this food price index is calculated on all the food items listed for Afghanistan which is good overall but will mask the three products we are looking at. I need to recalculate this. I want to look at each region and how that is effected.
 
 
 ```
-The base period is picked on the Wikipedia trends that is on the github readme to show this is the highest  conflicted time of the country that kept consistency for 3 years after. We want to look at the effects of conflict on food inflations. We want to create indices to further analyze the individual products with the company's coefficients in the stock market.
+I recalculated the index values to hold true to the individual products that we are using instead of using the "basket f goods" price index listed above in the original data set. I need to have strong comparisons per region to fully understand inflation in conflicted areas.
 
 ```{r include=TRUE}
 data_afghanistan <- data_afghanistan %>%
