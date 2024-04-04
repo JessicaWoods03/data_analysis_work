@@ -21,6 +21,6 @@ You can find more information on those market trends from this site-> https://ww
 Actual names are key to pulling US Stock market trends to compare them to the trends in these conflicted countries. <br>
 The funniest part about this research is finding that the most volatile stock is 2 year old male sheep in Syria! Yeah sheep are scarce in violent conflicted countries! The open and close values are rediculious. Obviously, lots of guns and lots of violence, sheep get killed in the conflict.<br>
 If America had serious Arms conflicts, I am sure the cost of cows would be crazy! (My personal theory anyway.)
-
+((sorry I haven't worked on this in a while, personal things came up, I will be back it this week))
 
 
