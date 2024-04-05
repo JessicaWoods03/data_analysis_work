@@ -284,6 +284,49 @@ ggplot(combined_data, aes(x = value, fill = group)) +
   labs(title = "Combined Histogram", x = "Values", y = "Frequency") +
   scale_fill_manual(values = alpha(c("blue", "yellow"), .2))
 ```
+```{r include=TRUE}
+data_Syria <- data_Syria %>%
+  mutate(MonthYear = format(Date, "%Y-%m"))
+grouped_data_syria <- data_Syria %>%
+  group_by(MonthYear, Product, Region, Open, Close) %>%
+  summarize(
+    CurrentPrice = mean((Open + Close) / 2), 
+  )
+#print(grouped_data_afghanistan)
+
+# Calculate the base price for each region
+base_prices <- grouped_data_syria %>%
+  group_by(Region) %>%
+  summarize(
+    BasePrice = mean(CurrentPrice)  
+  )
+# Merge the base prices back into the grouped_data_afghanistan
+final_data_syria <- merge(grouped_data_syria, base_prices, by = "Region")
+print(final_data_syria)
+
+# recalculate the price index 
+
+new_index_syria <- final_data_syria %>%
+  group_by(MonthYear, Product) %>%
+  summarize(
+    PriceIndex = mean((CurrentPrice / BasePrice) * 100)  # Price Index formula
+  )
+print(new_index_syria)
+ggplot(new_index_syria, aes(x = MonthYear, y = PriceIndex, group = Product, color = Product)) +
+  geom_line() +
+  labs(title = "Price Indices Over Time",
+       x = "Month",
+       y = "Price Index") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+# these three data points are important to the final set of data for Syria
+# Base price, current price, and price index
+# merge them into one data set
+# all the cleaning for Syria is done-
+final_data_syria <- merge(final_data_syria, new_index_syria, by = c("MonthYear", "Product"))
+str(final_data_syria)
+
+```
 Below is the conflict data which is from <https://acleddata.com/data-export-tool/>. This requires a access key to get this data, it seems to be the most up to date data on conflicts. That coincides with the Dates from the Food inflation.
 
 ```{r include=TRUE}
